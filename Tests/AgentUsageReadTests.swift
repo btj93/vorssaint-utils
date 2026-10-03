@@ -42,6 +42,7 @@ enum AgentUsageReadTests {
         catch { suite.expect(false, "the streaming fixture creates its folder: \(error)"); return }
         let now = Date()
         let timestamp = now.timeIntervalSince1970
+        let iso = ISO8601DateFormatter().string(from: now)
         let cases: [(AgentProvider, [String])] = [
             (.claude, [
                 #"{"type":"user","timestamp":\#(timestamp),"sessionId":"s","message":{"content":"work"}}"#,
@@ -57,6 +58,12 @@ enum AgentUsageReadTests {
                 #"{"type":"token_usage_record","timestamp":\#(timestamp),"payload":{"response_id":"r","usage":{"input_tokens":10,"output_tokens":5}}}"#,
                 #"{"type":"event_msg","timestamp":\#(timestamp),"payload":{"type":"token_count","rate_limits":{"plan_type":"pro","primary":{"used_percent":42,"window_minutes":300}}}}"#,
                 #"{"type":"event_msg","timestamp":\#(timestamp),"payload":{"type":"task_complete","duration_ms":20000}}"#
+            ]),
+            (.pi, [
+                #"{"type":"session","version":3,"id":"s","timestamp":"\#(iso)","cwd":"/tmp/example"}"#,
+                #"{"type":"message","id":"a1","timestamp":"\#(iso)","message":{"role":"user","content":"work"}}"#,
+                #"{"type":"message","id":"a2","timestamp":"\#(iso)","message":{"role":"assistant","model":"gpt-6-astra","stopReason":"toolUse","usage":{"input":10,"output":2,"cacheRead":0,"cacheWrite":0,"reasoning":0}}}"#,
+                #"{"type":"message","id":"a3","timestamp":"\#(iso)","message":{"role":"assistant","model":"gpt-6-astra","stopReason":"stop","usage":{"input":3,"output":7,"cacheRead":0,"cacheWrite":0,"reasoning":0}}}"#
             ])
         ]
         for (provider, lines) in cases {
@@ -72,6 +79,7 @@ enum AgentUsageReadTests {
                 case .claude: entries += AgentLogParser.parseClaude(line, state: &cursor.state, now: now)
                 case .codex: entries += AgentLogParser.parseCodex(line, state: &cursor.state, now: now)
                 case .opencode: entries += AgentLogParser.parseOpenCode(line, state: &cursor.state, now: now)
+                case .pi: entries += AgentLogParser.parsePi(line, state: &cursor.state, now: now)
                 }
             }
             let reference = AgentUsageStore()

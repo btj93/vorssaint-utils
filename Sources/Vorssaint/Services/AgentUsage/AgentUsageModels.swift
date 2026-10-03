@@ -6,7 +6,7 @@ import Foundation
 /// The coding agents whose session logs the island reads. Their names are
 /// product names and stay untranslated.
 enum AgentProvider: String, CaseIterable, Identifiable, Codable {
-    case claude, codex, opencode
+    case claude, codex, opencode, pi
 
     var id: String { rawValue }
 
@@ -15,6 +15,7 @@ enum AgentProvider: String, CaseIterable, Identifiable, Codable {
         case .claude: return "Claude"
         case .codex: return "Codex"
         case .opencode: return "OpenCode"
+        case .pi: return "Pi"
         }
     }
 
@@ -23,8 +24,13 @@ enum AgentProvider: String, CaseIterable, Identifiable, Codable {
         case .claude: return "sparkle"
         case .codex: return "chevron.left.forwardslash.chevron.right"
         case .opencode: return "terminal"
+        case .pi: return "p.circle"
         }
     }
+
+    /// Whether the log records what each response cost, which stands in for a
+    /// list price the model does not have.
+    var reportsCost: Bool { self == .opencode || self == .pi }
 }
 
 /// Token counts in the shape both logs can be reduced to. `input` excludes

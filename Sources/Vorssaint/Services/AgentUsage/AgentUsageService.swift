@@ -386,6 +386,7 @@ final class AgentUsageService: ObservableObject {
             case .claude: entries = AgentLogParser.parseClaude(line, state: &cursor.state, now: now)
             case .codex: entries = AgentLogParser.parseCodex(line, state: &cursor.state, now: now)
             case .opencode: entries = AgentLogParser.parseOpenCode(line, state: &cursor.state, now: now)
+            case .pi: entries = AgentLogParser.parsePi(line, state: &cursor.state, now: now)
             }
             guard !entries.isEmpty else { return }
             changed = true
